@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH2 – AD1 – Solutions aqueuses</title>
+<style>
+  :root {
+    --bleu:#1F4E79;--bleu2:#2E75B6;--bleu3:#D6E4F0;
+    --rouge:#C00000;--vert:#1E6B2E;--orange:#E67E22;--violet:#7D3C98;
+    --gris:#F4F4F4;--gris2:#DDDDDD;--noir:#1A1A1A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#ECEFF4;color:var(--noir);font-size:15px;}
+
+  header{background:var(--bleu);color:white;padding:12px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+  .header-badge{background:var(--rouge);color:white;font-weight:700;font-size:14px;padding:6px 12px;border-radius:6px;white-space:nowrap;}
+  .header-titles h1{font-size:17px;font-weight:700;line-height:1.2;}
+  .header-titles p{font-size:12px;opacity:0.75;margin-top:2px;}
+
+  .eleve-bar{background:white;border-bottom:2px solid var(--bleu3);padding:10px 20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+  .eleve-bar label{font-size:12px;font-weight:700;color:var(--bleu);white-space:nowrap;}
+  .eleve-bar input{border:none;border-bottom:1.5px solid var(--bleu2);padding:3px 6px;font-size:13px;font-family:inherit;background:transparent;color:var(--noir);width:160px;outline:none;}
+  .eleve-bar input:focus{border-bottom-color:var(--rouge);}
+  .eleve-field{display:flex;align-items:center;gap:6px;}
+
+  .toolbox{margin:14px 20px 0;background:white;border:2px solid var(--bleu2);border-radius:10px;overflow:hidden;}
+  .toolbox-header{background:var(--bleu2);color:white;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;}
+  .toolbox-header:hover{background:var(--bleu);}
+  .toolbox-body{padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;}
+  .toolbox-body.collapsed{display:none;}
+  .def-card{background:var(--gris);border-left:4px solid var(--bleu2);border-radius:6px;padding:10px 12px;}
+  .def-card h4{color:var(--bleu);font-size:13px;margin-bottom:6px;}
+  .def-card p{font-size:13px;line-height:1.6;}
+  .def-card .formula{background:white;border:1px solid var(--gris2);border-radius:4px;padding:8px 12px;margin-top:6px;font-size:15px;text-align:center;font-style:italic;}
+
+  .tabs-wrapper{margin:14px 20px 0;}
+  .tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;}
+  .tab-btn{background:white;border:2px solid var(--gris2);border-bottom:none;border-radius:8px 8px 0 0;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#666;white-space:nowrap;transition:all .2s;}
+  .tab-btn:hover{background:var(--bleu3);color:var(--bleu);}
+  .tab-btn.active{background:var(--bleu);color:white;border-color:var(--bleu);}
+  .tab-content{background:white;border:2px solid var(--gris2);border-radius:0 8px 8px 8px;padding:20px;display:none;}
+  .tab-content.active{display:block;}
+
+  .section-title{font-size:18px;font-weight:700;color:var(--bleu);text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;padding:8px;border-bottom:3px solid var(--bleu3);}
+  .situation-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+  .situation-num{background:var(--rouge);color:white;font-weight:700;font-size:20px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .situation-header h2{font-size:17px;color:var(--bleu);margin-bottom:4px;}
+  .situation-header p{font-size:13px;color:#555;line-height:1.5;}
+
+  canvas{border:2px solid var(--gris2);border-radius:8px;display:block;}
+
+  .doc-label{background:var(--bleu2);color:white;font-weight:700;font-size:13px;padding:5px 12px;border-radius:6px 6px 0 0;display:inline-block;}
+  .doc-box{border:2px solid var(--bleu2);border-radius:0 8px 8px 8px;padding:12px 14px;background:white;margin-bottom:16px;}
+  .doc-box p{font-size:13px;line-height:1.6;margin-bottom:8px;}
+
+  .questions{border-top:2px solid var(--bleu3);padding-top:14px;margin-top:4px;}
+  .q-title{font-size:12px;font-weight:700;color:var(--bleu);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;}
+  .question-block{margin-bottom:12px;}
+  .question{background:var(--gris);border-left:4px solid var(--bleu2);border-radius:0 6px 6px 0;padding:9px 12px;}
+  .question .code{display:inline-block;background:var(--bleu);color:white;font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:5px;}
+  .question p{font-size:13px;line-height:1.5;display:inline;}
+  .answer-field{width:100%;margin-top:4px;padding:7px 10px;border:1.5px solid var(--bleu3);border-radius:0 0 6px 6px;font-family:inherit;font-size:13px;color:var(--noir);background:#FAFCFF;resize:vertical;min-height:54px;outline:none;transition:border-color .15s;}
+  .answer-field:focus{border-color:var(--bleu2);background:white;}
+
+  /* Tableaux de réponses */
+  .resp-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;}
+  .resp-table th{background:var(--bleu2);color:white;padding:8px 12px;border:1px solid var(--bleu);font-weight:700;}
+  .resp-table td{padding:7px 10px;border:1px solid var(--gris2);vertical-align:top;}
+  .resp-table td:first-child{background:var(--gris);font-weight:700;color:var(--bleu);white-space:nowrap;}
+  .resp-table input[type=text]{border:none;border-bottom:1.5px solid var(--bleu2);padding:2px 4px;font-family:inherit;font-size:13px;width:100%;background:transparent;outline:none;}
+  .resp-table input[type=text]:focus{border-bottom-color:var(--rouge);}
+  .resp-table textarea{width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;resize:none;outline:none;min-height:36px;}
+  .resp-table textarea:focus{background:#f0f8ff;}
+
+  /* Exercices */
+  .ex-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .ex-badge{background:var(--orange);color:white;font-weight:700;font-size:15px;padding:5px 14px;border-radius:6px;}
+  .ex-title{font-size:16px;font-weight:700;color:var(--bleu);}
+  .ex-subtitle{font-size:12px;color:#666;font-style:italic;}
+  .ex-enonce{background:var(--gris);border-left:4px solid var(--orange);border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:12px;font-size:13px;line-height:1.7;}
+  .ex-enonce strong{color:var(--bleu);}
+  .donnees-box{background:#FFF8E1;border:1.5px solid #F0C040;border-radius:7px;padding:10px 14px;margin-bottom:10px;font-size:13px;}
+  .donnees-box h4{color:#8B6000;font-size:12px;font-weight:700;margin-bottom:4px;text-transform:uppercase;}
+  .sub-question{margin-bottom:10px;}
+  .sub-q-label{font-size:13px;font-weight:600;color:var(--bleu);margin-bottom:4px;}
+  .attn-box{background:#FFF3E0;border:1.5px solid var(--orange);border-radius:7px;padding:10px 14px;margin:8px 0;font-size:13px;}
+  .attn-box strong{color:var(--orange);}
+
+  /* Protocole steps */
+  .steps-list{counter-reset:step;display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+  .step-item{display:flex;gap:10px;align-items:flex-start;background:var(--gris);border-radius:6px;padding:10px 12px;}
+  .step-num{background:var(--bleu2);color:white;font-weight:700;font-size:13px;min-width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .step-item p{font-size:13px;line-height:1.5;}
+
+  /* Matériel tableau */
+  .mat-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  .mat-table th{background:var(--bleu);color:white;padding:7px 10px;border:1px solid var(--bleu2);text-align:left;}
+  .mat-table td{padding:6px 10px;border:1px solid var(--gris2);}
+  .mat-table tr:nth-child(even) td{background:var(--gris);}
+
+  /* Bilan */
+  .bilan-section{background:white;border:2px solid var(--vert);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+  .bilan-header{background:var(--vert);color:white;padding:10px 16px;font-weight:700;font-size:14px;}
+  .bilan-body{padding:16px 18px;}
+  .bilan-bloc-title{font-size:12px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid #C8E6C9;}
+  .trous-block{background:#F0FAF2;border:1.5px solid #A5D6A7;border-radius:8px;padding:14px 18px;margin-bottom:14px;font-size:13px;line-height:2.6;}
+  .trou{display:inline-block;border-bottom:2px solid var(--bleu2);min-width:110px;margin:0 3px;vertical-align:bottom;}
+  .trou input{border:none;outline:none;background:transparent;font-family:inherit;font-size:13px;width:110px;color:var(--noir);padding:0 2px;}
+
+  /* Canvas zones */
+  .canvas-2col{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:10px 0;}
+  .canvas-item{text-align:center;}
+  .canvas-caption{font-size:12px;font-weight:700;color:var(--bleu);margin-top:6px;}
+
+  .nav-bottom{display:flex;justify-content:flex-end;margin-top:14px;gap:8px;}
+  .btn-nav{background:var(--bleu);color:white;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+  .btn-nav:hover{background:var(--bleu2);}
+
+  /* Print / Save */
+  .print-bar{display:flex;justify-content:flex-end;margin:10px 20px 4px;gap:10px;align-items:center;flex-wrap:wrap;}
+  .save-bar{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex:1;padding:8px 12px;background:white;border:2px solid var(--bleu2);border-radius:8px;}
+  .save-bar span:first-child{font-size:13px;color:#555;}
+  .save-status{font-size:12px;color:#888;font-style:italic;flex:1;text-align:right;}
+  .save-status.ok{color:var(--vert);font-style:normal;font-weight:600;}
+  .save-status.warn{color:var(--orange);font-style:normal;font-weight:600;}
+  .btn-save{background:var(--vert);color:white;border:none;border-radius:7px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;}
+  .btn-clear{background:#C00000;color:white;border:none;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;}
+  .btn-print{background:var(--bleu2);color:white;border:none;border-radius:7px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;}
+
+  sup{font-size:0.75em;}
+
+  @media print {
+    @page{margin:0.8cm;}
+    header,.toolbox,.tabs,.nav-bottom,.print-bar,.save-bar{display:none !important;}
+    canvas{display:none !important;}
+    body{background:white;font-size:10pt;color:black;}
+    .eleve-bar{display:flex !important;border:1pt solid #999;border-radius:4pt;padding:5pt 8pt;margin-bottom:6pt;gap:12pt;}
+    .eleve-bar input{border-bottom:1pt solid black;font-size:10pt;width:110pt;}
+    .tab-content{display:block !important;border:1pt solid #CCC;border-radius:4pt;padding:7pt;margin-bottom:8pt;}
+    .tabs-wrapper{margin:0;}
+    .answer-field{border:1pt solid #999;min-height:22pt;font-size:10pt;padding:3pt;}
+    .resp-table textarea{min-height:20pt;}
+    .bilan-section{border:1pt solid #1E6B2E;border-radius:4pt;}
+    .bilan-header{background:#1E6B2E;color:white;padding:4pt 8pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .bilan-body{padding:5pt 8pt;}
+    .trous-block{font-size:10pt;padding:5pt 8pt;}
+    .trou input{font-size:10pt;}
+    .ex-enonce,.reso-enonce{font-size:10pt;padding:4pt 6pt;}
+    .donnees-box{font-size:9pt;padding:4pt 6pt;}
+    .step-item{page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">CH2 – AD1</div>
+  <div class="header-titles">
+    <h1>Les solutions aqueuses – Concentration et dissolution</h1>
+    <p>Chimie · Seconde · Corps purs et mélanges</p>
+  </div>
+</header>
+
+<div class="eleve-bar">
+  <div class="eleve-field"><label>Nom :</label><input type="text" id="nom" placeholder="…"></div>
+  <div class="eleve-field"><label>Prénom :</label><input type="text" id="prenom" placeholder="…"></div>
+  <div class="eleve-field"><label>Classe :</label><input type="text" id="classe" placeholder="…" style="width:80px"></div>
+  <div class="eleve-field"><label>Date :</label><input type="date" id="date-tp"></div>
+</div>
+
+<!-- Boîte à outils -->
+<div class="toolbox">
+  <div class="toolbox-header" onclick="toggleTB()">
+    📘 Rappels &amp; Définitions
+    <span id="tb-arrow">▼</span>
+  </div>
+  <div class="toolbox-body" id="tb-body">
+    <div class="def-card">
+      <h4>Solution aqueuse</h4>
+      <p>Mélange <strong>homogène</strong> dont le solvant est l'<strong>eau</strong>. Elle contient un ou plusieurs <strong>solutés</strong> dissous.</p>
+    </div>
+    <div class="def-card">
+      <h4>Soluté / Solvant</h4>
+      <p><strong>Solvant :</strong> espèce majoritaire (l'eau dans une solution aqueuse).<br>
+      <strong>Soluté :</strong> espèce dissoute en quantité minoritaire. Peut être <em>ionique</em> (ex : Na<sup>+</sup>, Cl<sup>−</sup>) ou <em>moléculaire</em> (ex : glucose).</p>
+    </div>
+    <div class="def-card">
+      <h4>Concentration en masse C<sub>m</sub></h4>
+      <p>Masse de soluté par volume de solution.</p>
+      <div class="formula">C<sub>m</sub> = m<sub>soluté</sub> / V<sub>solution</sub></div>
+      <p style="font-size:12px;margin-top:6px;">Unité : g·L<sup>−1</sup> &nbsp;|&nbsp; m en g &nbsp;|&nbsp; V en L</p>
+    </div>
+    <div class="def-card">
+      <h4>Dissolution — masse à peser</h4>
+      <p>Pour préparer un volume V à la concentration C<sub>m</sub> :</p>
+      <div class="formula">m<sub>soluté</sub> = C<sub>m</sub> × V<sub>solution</sub></div>
+    </div>
+    <div class="def-card">
+      <h4>Masse volumique ρ</h4>
+      <p>Masse de la <strong>solution entière</strong> par volume de solution (g·L<sup>−1</sup>).<br>
+      ⚠️ Différent de C<sub>m</sub> qui ne concerne que le <em>soluté</em> !</p>
+    </div>
+    <div class="def-card">
+      <h4>Solubilité</h4>
+      <p>Masse maximale de soluté pouvant se dissoudre dans 1 L de solvant à une température donnée. Au-delà : la solution est <strong>saturée</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Barre Save / Print -->
+<div class="print-bar">
+  <div class="save-bar">
+    <span>💾 Travail</span>
+    <button class="btn-save" onclick="saveWork()">Sauvegarder</button>
+    <button class="btn-clear" onclick="clearWork()">Effacer</button>
+    <span class="save-status" id="save-status">Non sauvegardé</span>
+  </div>
+  <button class="btn-print" onclick="window.print()">🖨️ Exporter PDF</button>
+</div>
+
+<!-- Onglets -->
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(0)">💧 Qu'est-ce qu'une solution ?</button>
+    <button class="tab-btn" onclick="showTab(1)">📐 Concentration en masse</button>
+    <button class="tab-btn" onclick="showTab(2)">🧪 La dissolution</button>
+    <button class="tab-btn" onclick="showTab(3)">✅ Bilan</button>
+  </div>
+
+  <!-- ════ TAB 0 : Qu'est-ce qu'une solution ? ════ -->
+  <div class="tab-content active" id="tab-0">
+    <div class="section-title">Qu'est-ce qu'une solution ?</div>
+
+    <!-- Document 1 -->
+    <div class="doc-label">DOCUMENT 1 — Schémas microscopiques de deux solutions aqueuses</div>
+    <div class="doc-box">
+      <p>Un chimiste prépare deux solutions. Les schémas ci-dessous représentent, à l'échelle microscopique, les deux systèmes obtenus.</p>
+      <div class="canvas-2col">
+        <div class="canvas-item">
+          <canvas id="c-nacl" width="280" height="190"></canvas>
+          <div class="canvas-caption">Système A — Chlorure de sodium NaCl dans l'eau</div>
+        </div>
+        <div class="canvas-item">
+          <canvas id="c-gluc" width="280" height="190"></canvas>
+          <div class="canvas-caption">Système B — Glucose C₆H₁₂O₆ dans l'eau</div>
+        </div>
+      </div>
+      <!-- Légendes -->
+      <div style="display:flex;gap:30px;justify-content:center;margin-top:8px;flex-wrap:wrap;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <canvas id="leg-h2o" width="18" height="18" style="border:none;border-radius:0;"></canvas>
+          <span>Molécule d'eau H₂O</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <canvas id="leg-na" width="18" height="18" style="border:none;border-radius:0;"></canvas>
+          <span>Ion sodium Na<sup>+</sup></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <canvas id="leg-cl" width="18" height="18" style="border:none;border-radius:0;"></canvas>
+          <span>Ion chlorure Cl<sup>−</sup></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <canvas id="leg-gl" width="18" height="18" style="border:none;border-radius:0;"></canvas>
+          <span>Molécule de glucose</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document 2 -->
+    <div class="doc-label">DOCUMENT 2 — Définitions</div>
+    <div class="doc-box">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:var(--bleu2);color:white;padding:8px 12px;border:1px solid var(--bleu);text-align:left;width:140px;">Terme</th>
+            <th style="background:var(--bleu2);color:white;padding:8px 12px;border:1px solid var(--bleu);text-align:left;">Définition et exemples</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);font-weight:700;background:var(--gris);">Solution</td>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);">Mélange homogène obtenu en dissolvant une ou plusieurs espèces chimiques (les solutés) dans un solvant.</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);font-weight:700;background:var(--gris);">Solution aqueuse</td>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);">Solution dont le solvant est l'eau.</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);font-weight:700;background:var(--gris);">Solvant</td>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);">Espèce chimique majoritaire dans la solution. Pour une solution aqueuse : l'eau.</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);font-weight:700;background:var(--gris);">Soluté</td>
+            <td style="padding:7px 10px;border:1px solid var(--gris2);">Espèce chimique dissoute, présente en quantité minoritaire. Peut être ionique ou moléculaire.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Questions -->
+    <div class="questions">
+      <div class="q-title">Questions</div>
+
+      <div class="question-block">
+        <div class="question">
+          <span class="code">Q1</span>
+          <p>En s'appuyant sur le document 2, identifier le solvant et le soluté pour chaque système du document 1.</p>
+        </div>
+        <div style="margin-top:6px;">
+          <table class="resp-table">
+            <thead>
+              <tr>
+                <th>Système</th>
+                <th>Solvant</th>
+                <th>Soluté</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>A — NaCl dans l'eau</td>
+                <td><input type="text" id="q1-a-solv"></td>
+                <td><input type="text" id="q1-a-solu"></td>
+              </tr>
+              <tr>
+                <td>B — Glucose dans l'eau</td>
+                <td><input type="text" id="q1-b-solv"></td>
+                <td><input type="text" id="q1-b-solu"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="question">
+          <span class="code">Q2</span>
+          <p>Donner deux exemples de solutions aqueuses de la vie courante. Préciser le soluté et le solvant de chacune.</p>
+        </div>
+        <textarea class="answer-field" id="q2" rows="4"></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question">
+          <span class="code">Q3</span>
+          <p>L'eau de mer contient du sel (chlorure de sodium) dissous dans l'eau. Préciser s'il s'agit d'un soluté ionique ou moléculaire. Justifier.</p>
+        </div>
+        <textarea class="answer-field" id="q3" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(1)">Concentration en masse →</button>
+    </div>
+  </div>
+
+  <!-- ════ TAB 1 : Concentration en masse ════ -->
+  <div class="tab-content" id="tab-1">
+    <div class="section-title">La concentration en masse</div>
+
+    <!-- Document 3 -->
+    <div class="doc-label">DOCUMENT 3 — Concentration en masse : définition et formule</div>
+    <div class="doc-box">
+      <p>La concentration en masse d'un soluté dans une solution est le quotient de la masse de soluté par le volume de la solution :</p>
+      <div style="text-align:center;font-size:18px;margin:10px 0;padding:10px;background:var(--bleu3);border-radius:8px;font-style:italic;">
+        C<sub>m</sub> = m<sub>soluté</sub> / V<sub>solution</sub>
+      </div>
+      <table class="mat-table" style="margin-top:10px;">
+        <thead>
+          <tr><th>Grandeur</th><th>Symbole</th><th>Unité</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Concentration en masse</td><td style="font-weight:700;font-style:italic;">C<sub>m</sub></td><td>g·L<sup>−1</sup></td></tr>
+          <tr><td>Masse de soluté</td><td style="font-weight:700;font-style:italic;">m<sub>soluté</sub></td><td>g</td></tr>
+          <tr><td>Volume de la solution</td><td style="font-weight:700;font-style:italic;">V<sub>solution</sub></td><td>L</td></tr>
+        </tbody>
+      </table>
+      <div class="attn-box" style="margin-top:10px;">
+        <strong>⚠️ Attention — C<sub>m</sub> ≠ masse volumique ρ</strong><br>
+        La <em>concentration en masse</em> C<sub>m</sub> est la masse de <strong>soluté</strong> par litre de solution.<br>
+        La <em>masse volumique</em> ρ est la masse de la <strong>solution entière</strong> par litre de solution.<br>
+        Ces deux grandeurs s'expriment avec la même unité (g·L<sup>−1</sup>) mais n'ont pas la même signification !
+      </div>
+    </div>
+
+    <!-- Exercice 3 -->
+    <div class="ex-header">
+      <div class="ex-badge">Ex. 3</div>
+      <div>
+        <div class="ex-title">Calculer une masse et un volume</div>
+        <div class="ex-subtitle">Effectuer un calcul</div>
+      </div>
+    </div>
+    <div class="ex-enonce">
+      Un sérum physiologique est une solution aqueuse de concentration <strong>C<sub>m</sub> = 9,0 g·L<sup>−1</sup></strong> en chlorure de sodium.
+    </div>
+    <div class="sub-question">
+      <div class="sub-q-label">1. Calculer la masse de chlorure de sodium à prélever pour préparer un volume V = 200,0 mL d'une solution de sérum physiologique. Montrer le calcul complet.</div>
+      <textarea class="answer-field" id="ex3-q1" rows="4"></textarea>
+    </div>
+    <div class="sub-question">
+      <div class="sub-q-label">2. Calculer le volume de sérum physiologique contenant m = 2,25 g de chlorure de sodium.</div>
+      <textarea class="answer-field" id="ex3-q2" rows="4"></textarea>
+    </div>
+
+    <!-- Exercice 4 -->
+    <div class="ex-header" style="margin-top:18px;">
+      <div class="ex-badge">Ex. 4</div>
+      <div>
+        <div class="ex-title">Calculer une concentration en masse</div>
+        <div class="ex-subtitle">Extraire et exploiter des informations</div>
+      </div>
+    </div>
+    <div class="ex-enonce">
+      Les étapes de préparation d'une solution aqueuse par dissolution de <strong>chlorure de fer (III)</strong> sont schématisées ci-dessous :<br>
+      <div style="display:flex;gap:24px;margin-top:10px;flex-wrap:wrap;align-items:center;font-size:13px;">
+        <div style="text-align:center;background:var(--gris);border-radius:6px;padding:8px 14px;border:1px solid var(--gris2);">
+          <div style="font-size:22px;font-weight:700;color:var(--rouge);">3,0 g</div>
+          <div>Balance — coupelle + soluté</div>
+        </div>
+        <div style="font-size:20px;color:#888;">→</div>
+        <div style="text-align:center;background:var(--gris);border-radius:6px;padding:8px 14px;border:1px solid var(--gris2);">
+          <div style="font-size:22px;font-weight:700;color:var(--rouge);">8,0 g</div>
+          <div>Balance — coupelle + soluté + eau</div>
+        </div>
+        <div style="font-size:20px;color:#888;">→</div>
+        <div style="text-align:center;background:var(--gris);border-radius:6px;padding:8px 14px;border:1px solid var(--gris2);">
+          <div style="font-size:22px;font-weight:700;color:var(--bleu);">100,0 mL</div>
+          <div>Fiole jaugée</div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-question">
+      <div class="sub-q-label">Calculer la concentration en masse C<sub>m</sub> de la solution en chlorure de fer (III).</div>
+      <textarea class="answer-field" id="ex4" rows="4"></textarea>
+    </div>
+
+    <!-- Exercice 7 -->
+    <div class="ex-header" style="margin-top:18px;">
+      <div class="ex-badge">Ex. 7</div>
+      <div>
+        <div class="ex-title">Calculer la masse volumique et la concentration en masse d'une solution</div>
+        <div class="ex-subtitle">Exploiter des résultats</div>
+      </div>
+    </div>
+    <div class="ex-enonce">
+      Un volume de 100,0 mL de liquide à perfusion contient 10,0 g de glucose. La masse de cette solution est de 103,0 g.
+    </div>
+    <div class="sub-question">
+      <div class="sub-q-label">1. Calculer la concentration en masse de glucose du liquide à perfusion.</div>
+      <textarea class="answer-field" id="ex7-q1" rows="4"></textarea>
+    </div>
+    <div class="sub-question">
+      <div class="sub-q-label">2. Calculer la masse volumique du liquide à perfusion.</div>
+      <textarea class="answer-field" id="ex7-q2" rows="4"></textarea>
+    </div>
+    <div class="sub-question">
+      <div class="sub-q-label">3. Identifier ce qui distingue la concentration en masse et la masse volumique.</div>
+      <textarea class="answer-field" id="ex7-q3" rows="3"></textarea>
+    </div>
+
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(0)">← Solution aqueuse</button>
+      <button class="btn-nav" onclick="showTab(2)">La dissolution →</button>
+    </div>
+  </div>
+
+  <!-- ════ TAB 2 : La dissolution ════ -->
+  <div class="tab-content" id="tab-2">
+    <div class="section-title">La dissolution</div>
+
+    <!-- Document 4 -->
+    <div class="doc-label">DOCUMENT 4 — Protocole de préparation d'une solution par dissolution</div>
+    <div class="doc-box">
+      <p>La dissolution est la dispersion d'un soluté dans un solvant pour former un mélange homogène. Pour préparer un volume V<sub>solution</sub> de solution à la concentration C<sub>m</sub>, il faut peser :</p>
+      <div style="text-align:center;font-size:16px;margin:8px 0 12px;padding:8px;background:var(--bleu3);border-radius:8px;font-style:italic;">
+        m<sub>soluté</sub> = C<sub>m</sub> × V<sub>solution</sub>
+      </div>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num">1</div><p>Poser la coupelle de pesée sur la balance et faire la tare. Peser la masse m<sub>soluté</sub> de soluté dans une coupelle de pesée.</p></div>
+        <div class="step-item"><div class="step-num">2</div><p>Introduire le solide dans la fiole jaugée à l'aide d'un entonnoir à solide. Rincer la coupelle et l'entonnoir avec de l'eau distillée.</p></div>
+        <div class="step-item"><div class="step-num">3</div><p>Remplir la fiole aux trois quarts avec de l'eau distillée. Boucher et agiter pour dissoudre totalement le soluté.</p></div>
+        <div class="step-item"><div class="step-num">4</div><p>Compléter avec de l'eau distillée jusqu'au trait de jauge (placer les yeux au niveau du trait, bas du ménisque).</p></div>
+        <div class="step-item"><div class="step-num">5</div><p>Boucher la fiole et agiter pour homogénéiser la solution.</p></div>
+      </div>
+    </div>
+
+    <!-- Document 5 -->
+    <div class="doc-label">DOCUMENT 5 — Matériel de la dissolution</div>
+    <div class="doc-box">
+      <table class="mat-table">
+        <thead>
+          <tr><th>Matériel</th><th>Utilisation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Balance + coupelle de pesée</td><td>Peser la masse de soluté</td></tr>
+          <tr><td>Bécher de prélèvement + spatule</td><td>Prélever le soluté</td></tr>
+          <tr><td>Fiole jaugée + bouchon</td><td>Préparer la solution. Le volume de la fiole définit le volume de la solution.</td></tr>
+          <tr><td>Entonnoir à solide</td><td>Introduire le solide dans la fiole sans en perdre</td></tr>
+          <tr><td>Pissette d'eau distillée</td><td>Rinçages + remplissage de la fiole</td></tr>
+          <tr><td>Compte-goutte</td><td>Ajuster le trait de jauge avec précision</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Exercice 9 -->
+    <div class="ex-header">
+      <div class="ex-badge">Ex. 9</div>
+      <div>
+        <div class="ex-title">Connaître le matériel de dissolution</div>
+        <div class="ex-subtitle">Restituer ses connaissances</div>
+      </div>
+    </div>
+    <div class="ex-enonce">
+      Nommer le matériel nécessaire pour préparer <strong>200,0 mL</strong> d'une solution de concentration <strong>20,0 g·L<sup>−1</sup></strong> en <strong>sulfate de cuivre</strong> par dissolution.
+    </div>
+    <div class="sub-question">
+      <textarea class="answer-field" id="ex9" rows="5"></textarea>
+    </div>
+
+    <!-- Question 4 -->
+    <div class="questions" style="margin-top:14px;">
+      <div class="q-title">Question de synthèse</div>
+      <div class="question-block">
+        <div class="question">
+          <span class="code">Q4</span>
+          <p>La solubilité de la vanilline dans l'eau est de <strong>10 g·L<sup>−1</sup></strong> à 20 °C. Un étudiant veut préparer 250 mL d'une solution de vanilline de concentration <strong>12 g·L<sup>−1</sup></strong>. Calculer la masse à peser. Y a-t-il un problème ? Justifier.</p>
+        </div>
+        <textarea class="answer-field" id="q4" rows="5"></textarea>
+      </div>
+    </div>
+
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(1)">← Concentration</button>
+      <button class="btn-nav" onclick="showTab(3)">Bilan →</button>
+    </div>
+  </div>
+
+  <!-- ════ TAB 3 : Bilan ════ -->
+  <div class="tab-content" id="tab-3">
+    <div class="bilan-section">
+      <div class="bilan-header">✅ Bilan — Ce que je dois savoir</div>
+      <div class="bilan-body">
+        <div class="bilan-bloc-title">Texte à compléter</div>
+        <div class="trous-block">
+          Une <span class="trou"><input type="text" id="t1" placeholder="solution"></span>
+          est un mélange
+          <span class="trou"><input type="text" id="t2" placeholder=""></span>.
+          Lorsque le solvant est l'eau, on parle de solution
+          <span class="trou"><input type="text" id="t3" placeholder=""></span>.
+          L'espèce majoritaire est le
+          <span class="trou"><input type="text" id="t4" placeholder=""></span>
+          et l'espèce dissoute (minoritaire) est le
+          <span class="trou"><input type="text" id="t5" placeholder=""></span>,
+          qui peut être ionique ou
+          <span class="trou"><input type="text" id="t6" placeholder=""></span>.
+          La concentration en masse se calcule par
+          <span class="trou"><input type="text" id="t7" placeholder="" style="width:100px;"></span>
+          et s'exprime en
+          <span class="trou"><input type="text" id="t8" placeholder=""></span>.
+          Pour préparer une solution par
+          <span class="trou"><input type="text" id="t9" placeholder=""></span>,
+          on utilise une
+          <span class="trou"><input type="text" id="t10" placeholder=""></span>
+          pour mesurer précisément le volume.
+        </div>
+
+        <div class="bilan-bloc-title" style="margin-top:12px;">Synthèse personnelle</div>
+        <div class="question-block">
+          <div style="background:#F0FAF2;border-left:4px solid var(--vert);border-radius:0 6px 6px 0;padding:9px 12px;font-size:13px;">
+            Faire une synthèse des différents éléments de cours et de méthode qu'il faut retenir.
+          </div>
+          <textarea class="answer-field" id="bilan-synthese" rows="7"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-bottom">
+      <button class="btn-nav" onclick="showTab(2)">← La dissolution</button>
+    </div>
+  </div>
+</div><!-- fin tabs-wrapper -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CANVAS — Représentations microscopiques
+// ═══════════════════════════════════════════════════════
+
+// Couleurs
+const C_H2O = '#4A90D9';   // bleu eau
+const C_NA  = '#F5A623';   // orange Na+
+const C_CL  = '#7ED321';   // vert Cl-
+const C_GL  = '#9B59B6';   // violet glucose
+
+function drawMolecule(ctx, x, y, type) {
+  const r = type === 'h2o' ? 7 : type === 'na' ? 8 : type === 'cl' ? 9 : 11;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI*2);
+  const col = type === 'h2o' ? C_H2O : type === 'na' ? C_NA : type === 'cl' ? C_CL : C_GL;
+  ctx.fillStyle = col;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1;
+  ctx.stroke();
+  // Signe ou lettre
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold ' + (r < 9 ? '9' : '10') + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if (type === 'na') ctx.fillText('+', x, y-1);
+  else if (type === 'cl') ctx.fillText('−', x, y);
+  else if (type === 'gl') {
+    // hexagone simplifié
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i=0;i<6;i++){
+      const a = i*Math.PI/3 - Math.PI/6;
+      const px = x + (r-3)*Math.cos(a), py = y + (r-3)*Math.sin(a);
+      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+}
+
+function seededRand(seed) {
+  // Simple LCG pour positions reproductibles
+  let s = seed;
+  return function() { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+function drawSolution(canvasId, types, seed=42) {
+  const can = document.getElementById(canvasId);
+  if (!can) return;
+  const ctx = can.getContext('2d');
+  const W = can.width, H = can.height;
+  const rng = seededRand(seed);
+
+  // Fond dégradé (eau)
+  const grd = ctx.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0,'#E8F4FF');
+  grd.addColorStop(1,'#C9E8FF');
+  ctx.fillStyle = grd;
+  ctx.roundRect(0,0,W,H,8);
+  ctx.fill();
+
+  // Petites vagues décoratives
+  ctx.strokeStyle = 'rgba(74,144,217,0.15)'; ctx.lineWidth = 1.5;
+  for (let y=20;y<H;y+=18){
+    ctx.beginPath();
+    for (let x=0;x<=W;x+=8){
+      const yw = y + Math.sin((x + y*3)/14)*3;
+      x===0 ? ctx.moveTo(x,yw) : ctx.lineTo(x,yw);
+    }
+    ctx.stroke();
+  }
+
+  // Placer les entités
+  const positions = [];
+  const counts = {};
+  types.forEach(t => counts[t] = (counts[t]||0)+1);
+
+  const total = types.length;
+  let placed = 0;
+  let attempts = 0;
+
+  function overlaps(x,y,r) {
+    return positions.some(p => Math.hypot(p.x-x, p.y-y) < r + p.r + 4);
+  }
+
+  types.forEach(type => {
+    const r = type === 'h2o' ? 7 : type === 'na' ? 8 : type === 'cl' ? 9 : 11;
+    let ok = false; let tries = 0;
+    while (!ok && tries < 80) {
+      const x = r+8 + rng()*(W-2*r-16);
+      const y = r+8 + rng()*(H-2*r-16);
+      if (!overlaps(x,y,r)) { positions.push({x,y,r,type}); ok=true; }
+      tries++;
+    }
+    if (!ok) positions.push({x:r+8+rng()*(W-2*r-16), y:r+8+rng()*(H-2*r-16), r, type});
+  });
+
+  positions.forEach(p => drawMolecule(ctx, p.x, p.y, p.type));
+}
+
+// Légendes
+function drawLegendDot(canvasId, color, sign) {
+  const can = document.getElementById(canvasId);
+  if (!can) return;
+  const ctx = can.getContext('2d');
+  ctx.clearRect(0,0,18,18);
+  ctx.beginPath(); ctx.arc(9,9,8,0,Math.PI*2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=1; ctx.stroke();
+  if (sign) {
+    ctx.fillStyle='white'; ctx.font='bold 10px Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(sign,9,8);
+  }
+}
+
+function initCanvases() {
+  // Système A : NaCl (eau + Na+ + Cl-)
+  const typesA = [];
+  for(let i=0;i<22;i++) typesA.push('h2o');
+  for(let i=0;i<5;i++) { typesA.push('na'); typesA.push('cl'); }
+  drawSolution('c-nacl', typesA, 1337);
+
+  // Système B : Glucose (eau + glucose)
+  const typesB = [];
+  for(let i=0;i<22;i++) typesB.push('h2o');
+  for(let i=0;i<6;i++) typesB.push('gl');
+  drawSolution('c-gluc', typesB, 2023);
+
+  // Légendes
+  drawLegendDot('leg-h2o', C_H2O, '');
+  drawLegendDot('leg-na',  C_NA,  '+');
+  drawLegendDot('leg-cl',  C_CL,  '−');
+  drawLegendDot('leg-gl',  C_GL,  '');
+}
+window.addEventListener('load', initCanvases);
+
+// ═══════════════════════════════════════════════════════
+//  ONGLETS
+// ═══════════════════════════════════════════════════════
+function showTab(n) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+  document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
+  setTimeout(initCanvases, 40);
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOOLBOX
+// ═══════════════════════════════════════════════════════
+function toggleTB() {
+  const b = document.getElementById('tb-body');
+  const a = document.getElementById('tb-arrow');
+  b.classList.toggle('collapsed');
+  a.textContent = b.classList.contains('collapsed') ? '▶' : '▼';
+}
+
+// ═══════════════════════════════════════════════════════
+//  SAVE / LOAD
+// ═══════════════════════════════════════════════════════
+const SAVE_KEY = 'ch2_ad1_solutions_aqueuses_v1';
+
+const ALL_IDS = [
+  'nom','prenom','classe','date-tp',
+  'q1-a-solv','q1-a-solu','q1-b-solv','q1-b-solu',
+  'q2','q3','q4',
+  'ex3-q1','ex3-q2','ex4','ex7-q1','ex7-q2','ex7-q3','ex9',
+  't1','t2','t3','t4','t5','t6','t7','t8','t9','t10',
+  'bilan-synthese'
+];
+
+function saveWork() {
+  try {
+    const data = {};
+    ALL_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+    data._savedAt = new Date().toLocaleString('fr-FR');
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    const st = document.getElementById('save-status');
+    st.textContent = '✅ Sauvegardé le ' + data._savedAt;
+    st.className = 'save-status ok';
+  } catch(e) {
+    const st = document.getElementById('save-status');
+    st.textContent = '⚠️ Erreur de sauvegarde';
+    st.className = 'save-status warn';
+  }
+}
+
+function clearWork() {
+  if (!confirm('Effacer tout le travail ? Cette action est irréversible.')) return;
+  localStorage.removeItem(SAVE_KEY);
+  ALL_IDS.filter(id => !['nom','prenom','classe','date-tp'].includes(id)).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const st = document.getElementById('save-status');
+  st.textContent = 'Travail effacé';
+  st.className = 'save-status warn';
+}
+
+function loadWork() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    ALL_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && data[id] !== undefined) el.value = data[id];
+    });
+    const st = document.getElementById('save-status');
+    st.textContent = data._savedAt ? '✅ Chargé — ' + data._savedAt : '✅ Chargé';
+    st.className = 'save-status ok';
+  } catch(e) {}
+}
+
+setInterval(saveWork, 60000);
+window.addEventListener('load', loadWork);
+</script>
+</body>
+</html>
